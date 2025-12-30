@@ -1,0 +1,17 @@
+{
+  "name": "com.helyn.unity.helynlogger",
+  "displayName": "Helyn logger",
+  "version": "1.0.0",
+  "description": "A custom logger that filters and color logs.",
+  "keywords": [
+    "Helyn",
+    "logger",
+    "C#",
+    "log",
+    "logs"
+  ],
+  "repository": {
+    "url": "https://github.com/SimonVRANA/HelynLoggerForUnity",
+    "type": "git"
+  }
+}

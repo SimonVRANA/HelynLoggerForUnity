@@ -1,0 +1,1 @@
+Documentation can be found in [package README](com.helyn.unity.helynlogger/README.md).
