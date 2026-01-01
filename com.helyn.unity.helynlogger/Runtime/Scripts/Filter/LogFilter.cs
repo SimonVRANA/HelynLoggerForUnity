@@ -7,36 +7,87 @@ using UnityEngine;
 
 namespace Helyn.Logger
 {
-    public class LogFilter
-    {
-        private readonly LogType defaultLogLevel = LogType.Log;
+	public class LogFilter
+	{
+		private LogType defaultLogLevel = LogType.Log;
 
-        private ConcurrentDictionary<string, LogType> logLevelForCategories = new();
+		private ConcurrentDictionary<string, LogType> logLevelForCategories = new();
+		private readonly ConcurrentDictionary<string, LogType> resolvedLogTypes = new();
 
-        public LogFilter(string filterJson, LogType defaultLogLevel)
-        {
-            this.defaultLogLevel = defaultLogLevel;
-            try
-            {
-                ConcurrentDictionary<string, LogType> filterDict = JsonConvert.DeserializeObject<ConcurrentDictionary<string, LogType>>(filterJson);
-                if (filterDict != null)
-                {
-                    logLevelForCategories = filterDict;
-                }
-            }
-            catch
-            {
-                Debug.LogError("Failed to parse log filter JSON. Using default log level for all logs.");
-            }
-        }
+		public LogFilter(string filterJson, LogType defaultLogLevel)
+		{
+			UpdateSettings(filterJson, defaultLogLevel);
+		}
 
-        public bool ShouldLog(string category, LogType logType)
-        {
-            if (logLevelForCategories.TryGetValue(category, out LogType categoryLogType))
-            {
-                return logType >= categoryLogType;
-            }
-            return logType >= defaultLogLevel;
-        }
-    }
+		public void UpdateSettings(string filterJson, LogType newDefaultLevel)
+		{
+			this.defaultLogLevel = newDefaultLevel;
+
+			ConcurrentDictionary<string, LogType> newRules = JsonConvert.DeserializeObject<ConcurrentDictionary<string, LogType>>(filterJson);
+			if (newRules != null)
+			{
+				logLevelForCategories = newRules;
+			}
+
+			resolvedLogTypes.Clear();
+		}
+
+		public bool ShouldLog(string category, LogType incomingLogType)
+		{
+			// 1. Check Cache
+			if (resolvedLogTypes.TryGetValue(category, out LogType cachedThreshold))
+			{
+				return IsSeverityHighEnough(incomingLogType, cachedThreshold);
+			}
+
+			// 2. Calculate & Cache
+			LogType foundThreshold = FindEffectiveLogLevel(category);
+			resolvedLogTypes.TryAdd(category, foundThreshold);
+
+			return IsSeverityHighEnough(incomingLogType, foundThreshold);
+		}
+
+		private LogType FindEffectiveLogLevel(string category)
+		{
+			string currentSearch = category;
+			while (!string.IsNullOrEmpty(currentSearch))
+			{
+				if (logLevelForCategories.TryGetValue(currentSearch, out LogType threshold))
+				{
+					return threshold;
+				}
+
+				int lastDot = currentSearch.LastIndexOf('.');
+				if (lastDot > -1)
+				{
+					currentSearch = currentSearch.Substring(0, lastDot);
+				}
+				else
+				{
+					break;
+				}
+			}
+			return defaultLogLevel;
+		}
+
+		// Unity LogType Enum is not sorted by severity!
+		// Error=0, Assert=1, Warning=2, Log=3, Exception=4
+		private bool IsSeverityHighEnough(LogType incoming, LogType threshold)
+		{
+			return GetSeverity(incoming) >= GetSeverity(threshold);
+		}
+
+		private int GetSeverity(LogType logType)
+		{
+			return logType switch
+			{
+				LogType.Exception => 5,
+				LogType.Error => 4,
+				LogType.Assert => 4, // Treat Assert like Error
+				LogType.Warning => 3,
+				LogType.Log => 2,
+				_ => 1
+			};
+		}
+	}
 }
