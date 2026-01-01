@@ -27,6 +27,9 @@ namespace Helyn.Logger
 			}
 		}
 
+		public LogType defaultLogLevel = LogType.Log;
+		public string filter = "{}";
+
 		#region Unity console
 
 		public bool EnableConsoleLogging { get; set; } = true;
