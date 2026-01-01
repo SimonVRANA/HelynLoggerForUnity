@@ -1,0 +1,3 @@
+[submodule ".config/CsEditorConfig"]
+	path = .config/CsEditorConfig
+	url = git@github.com:SimonVRANA/CSharpEditorConfig.git
