@@ -2,22 +2,50 @@
 // Please ask by email (simon.vrana.pro@gmail.com) before reusing for commercial purpose.
 
 using System;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace Helyn.Logger
 {
-	public class HelynUnityLogHandler
+	public static class HelynUnityLogHandler
 	{
 		[HideInCallstack]
-		internal void LogException(Exception exception, UnityEngine.Object context)
+		internal static void LogException(Exception exception, UnityEngine.Object context)
 		{
 			throw new NotImplementedException();
 		}
 
 		[HideInCallstack]
-		internal void LogFormat(LogType logType, UnityEngine.Object context, string format, object[] args)
+		internal static void LogFormat(LogType logType, UnityEngine.Object context, string format, object[] args)
 		{
+			context.
 			throw new NotImplementedException();
+		}
+
+		[HideInCallstack]
+		private static void Log()
+		{
+			string fullMessage = LogFormatter.FormatLogMessage(logType, categoryName, message, settings);
+			switch (logLevel)
+			{
+				case LogLevel.Critical:
+				case LogLevel.Error:
+					Debug.LogError(fullMessage);
+					break;
+
+				case LogLevel.Warning:
+					Debug.LogWarning(fullMessage);
+					break;
+
+				default:
+					Debug.Log(fullMessage);
+					break;
+			}
+
+			if (exception != null)
+			{
+				Debug.LogException(exception);
+			}
 		}
 	}
 }

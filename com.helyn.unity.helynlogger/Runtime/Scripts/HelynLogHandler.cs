@@ -13,7 +13,6 @@ namespace Helyn.Logger
 		private LogFilter logFilter;
 
 		private HelynFileLogHandler fileLogHandler = new();
-		private HelynUnityLogHandler unityLogHandler = new();
 
 		public HelynLogHandler()
 		{
@@ -36,7 +35,7 @@ namespace Helyn.Logger
 			}
 			if (settings.EnableConsoleLogging)
 			{
-				unityLogHandler.LogException(exception, context);
+				HelynUnityLogHandler.LogException(exception, context);
 			}
 		}
 
@@ -54,7 +53,7 @@ namespace Helyn.Logger
 			}
 			if (settings.EnableConsoleLogging)
 			{
-				unityLogHandler.LogFormat(logType, context, format, args);
+				HelynUnityLogHandler.LogFormat(logType, context, format, args);
 			}
 		}
 

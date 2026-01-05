@@ -35,12 +35,11 @@ namespace Helyn.Logger
 		public bool EnableConsoleLogging { get; set; } = true;
 		public string ConsoleLogFormat { get; set; } = "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}";
 		public bool ColorLogLevel { get; set; } = false;
-		public string TraceColor { get; set; } = "white";
-		public string DebugColor { get; set; } = "white";
-		public string InformationColor { get; set; } = "white";
+		public string LogColor { get; set; } = "white";
 		public string WarningColor { get; set; } = "yellow";
 		public string ErrorColor { get; set; } = "red";
-		public string CriticalColor { get; set; } = "magenta";
+		public string AssertColor { get; set; } = "red";
+		public string ExceptionColor { get; set; } = "magenta";
 		public string NoneColor { get; set; } = "white";
 
 		#endregion Unity console
