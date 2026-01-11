@@ -13,5 +13,8 @@
   "repository": {
     "url": "https://github.com/SimonVRANA/HelynLoggerForUnity",
     "type": "git"
+  },
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.2"
   }
 }
