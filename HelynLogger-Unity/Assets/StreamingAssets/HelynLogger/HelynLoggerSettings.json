@@ -1,0 +1,89 @@
+{
+  "ConfigFolderPath": "HelynLogger",
+  "ConfigFileName": "HelynLoggerConfig.json",
+  "DefaultLogLevel": 3,
+  "Filter": "{\"Helyn.Logger.Example\":\"Log\"}",
+  "EnableConsoleLogging": true,
+  "ConsoleLogFormat": {
+    "Format": "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}",
+    "EnableColorLogLevel": true,
+    "LogColor": {
+      "r": 1.0,
+      "g": 1.0,
+      "b": 1.0,
+      "a": 1.0
+    },
+    "WarningColor": {
+      "r": 1.0,
+      "g": 0.921568632,
+      "b": 0.0156862754,
+      "a": 1.0
+    },
+    "ErrorColor": {
+      "r": 1.0,
+      "g": 0.0,
+      "b": 0.0,
+      "a": 1.0
+    },
+    "AssertColor": {
+      "r": 1.0,
+      "g": 0.0,
+      "b": 0.0,
+      "a": 1.0
+    },
+    "ExceptionColor": {
+      "r": 1.0,
+      "g": 0.0,
+      "b": 1.0,
+      "a": 1.0
+    },
+    "NoneColor": {
+      "r": 1.0,
+      "g": 1.0,
+      "b": 1.0,
+      "a": 1.0
+    }
+  },
+  "EnableFileLogging": false,
+  "LogFilePath": "logs/log.txt",
+  "FileLogFormat": {
+    "Format": "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}",
+    "EnableColorLogLevel": false,
+    "LogColor": {
+      "r": 0.0,
+      "g": 0.0,
+      "b": 0.0,
+      "a": 1.0
+    },
+    "WarningColor": {
+      "r": 1.0,
+      "g": 0.921568632,
+      "b": 0.0156862754,
+      "a": 1.0
+    },
+    "ErrorColor": {
+      "r": 1.0,
+      "g": 0.0,
+      "b": 0.0,
+      "a": 1.0
+    },
+    "AssertColor": {
+      "r": 1.0,
+      "g": 0.0,
+      "b": 0.0,
+      "a": 1.0
+    },
+    "ExceptionColor": {
+      "r": 1.0,
+      "g": 0.0,
+      "b": 1.0,
+      "a": 1.0
+    },
+    "NoneColor": {
+      "r": 0.0,
+      "g": 0.0,
+      "b": 0.0,
+      "a": 1.0
+    }
+  }
+}

@@ -2,50 +2,30 @@
 // Please ask by email (simon.vrana.pro@gmail.com) before reusing for commercial purpose.
 
 using System;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace Helyn.Logger
 {
 	public static class HelynUnityLogHandler
 	{
+		public static ILogHandler DefaultLogHandler { get; internal set; }
+		public static LogFormat Format { get; internal set; }
+
 		[HideInCallstack]
-		internal static void LogException(Exception exception, UnityEngine.Object context)
+		internal static void LogException(string categoryName, Exception exception, UnityEngine.Object context)
 		{
-			throw new NotImplementedException();
+			string header = LogFormatter.FormatLogMessage(LogType.Exception, categoryName, "Exception Triggered:", Format);
+			DefaultLogHandler.LogFormat(LogType.Exception, context, "{0}", header);
+			DefaultLogHandler.LogException(exception, context);
 		}
 
 		[HideInCallstack]
-		internal static void LogFormat(LogType logType, UnityEngine.Object context, string format, object[] args)
+		internal static void LogFormat(LogType logType, string categoryName, UnityEngine.Object context, string format, object[] args)
 		{
-			context.
-			throw new NotImplementedException();
-		}
+			string finalMessage = (args != null && args.Length > 0) ? string.Format(format, args)
+																	: format;
 
-		[HideInCallstack]
-		private static void Log()
-		{
-			string fullMessage = LogFormatter.FormatLogMessage(logType, categoryName, message, settings);
-			switch (logLevel)
-			{
-				case LogLevel.Critical:
-				case LogLevel.Error:
-					Debug.LogError(fullMessage);
-					break;
-
-				case LogLevel.Warning:
-					Debug.LogWarning(fullMessage);
-					break;
-
-				default:
-					Debug.Log(fullMessage);
-					break;
-			}
-
-			if (exception != null)
-			{
-				Debug.LogException(exception);
-			}
+			DefaultLogHandler.LogFormat(logType, context, "{0}", LogFormatter.FormatLogMessage(logType, categoryName, finalMessage, Format));
 		}
 	}
 }

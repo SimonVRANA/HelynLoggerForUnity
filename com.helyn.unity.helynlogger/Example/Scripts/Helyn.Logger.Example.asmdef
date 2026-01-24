@@ -1,0 +1,14 @@
+{
+    "name": "Helyn.Logger.Example",
+    "rootNamespace": "Helyn.Logger.Example",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

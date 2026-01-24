@@ -9,22 +9,41 @@ namespace Helyn.Logger
 {
 	public class HelynLogHandler : ILogHandler
 	{
-		private LoggerSettings settings;
-		private LogFilter logFilter;
+		private readonly LoggerSettings settings;
+		private readonly LogFilter logFilter;
 
-		private HelynFileLogHandler fileLogHandler = new();
+		private readonly HelynFileLogHandler fileLogHandler = new();
 
-		public HelynLogHandler()
+		private readonly ILogHandler defaultLogHandler;
+
+		public HelynLogHandler(ILogHandler defautlLogHandler)
 		{
 			settings = LoggerSettingsLoader.LoadSettings();
 
 			logFilter = new LogFilter(settings.Filter, settings.DefaultLogLevel);
+
+			this.defaultLogHandler = defautlLogHandler;
+			HelynUnityLogHandler.DefaultLogHandler = defaultLogHandler;
+			HelynUnityLogHandler.Format = settings.ConsoleLogFormat;
+		}
+
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		private static void AutoInitialize()
+		{
+			if (UnityEngine.Debug.unityLogger.logHandler is HelynLogHandler)
+			{
+				return;
+			}
+
+			HelynLogHandler myHandler = new(UnityEngine.Debug.unityLogger.logHandler);
+			UnityEngine.Debug.unityLogger.logHandler = myHandler;
 		}
 
 		[HideInCallstack]
 		public void LogException(Exception exception, UnityEngine.Object context)
 		{
-			if (!logFilter.ShouldLog(GetCategory(context), LogType.Exception))
+			string category = GetCategory(context);
+			if (!logFilter.ShouldLog(category, LogType.Exception))
 			{
 				return;
 			}
@@ -35,14 +54,15 @@ namespace Helyn.Logger
 			}
 			if (settings.EnableConsoleLogging)
 			{
-				HelynUnityLogHandler.LogException(exception, context);
+				HelynUnityLogHandler.LogException(category, exception, context);
 			}
 		}
 
 		[HideInCallstack]
 		public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
 		{
-			if (!logFilter.ShouldLog(GetCategory(context), logType))
+			string category = GetCategory(context);
+			if (!logFilter.ShouldLog(category, logType))
 			{
 				return;
 			}
@@ -53,7 +73,7 @@ namespace Helyn.Logger
 			}
 			if (settings.EnableConsoleLogging)
 			{
-				HelynUnityLogHandler.LogFormat(logType, context, format, args);
+				HelynUnityLogHandler.LogFormat(logType, category, context, format, args);
 			}
 		}
 
@@ -92,6 +112,11 @@ namespace Helyn.Logger
 					type.Name == "DebugLogHandler")             // Handle Unity LogHandler internal class by name (just in case)
 				{
 					continue;
+				}
+
+				while (type.DeclaringType != null && type.Name.Contains("<"))
+				{
+					type = type.DeclaringType;
 				}
 
 				// The first class that isn't a logger is our Source.

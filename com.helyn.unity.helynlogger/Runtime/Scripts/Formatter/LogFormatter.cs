@@ -15,18 +15,18 @@ namespace Helyn.Logger
 		public static string FormatLogMessage(LogType logType,
 											  string category,
 											  string message,
-											  LoggerSettings settings)
+											  LogFormat format)
 		{
-			if (string.IsNullOrWhiteSpace(settings.ConsoleLogFormat))
+			if (string.IsNullOrWhiteSpace(format.Format))
 			{
-				settings.ConsoleLogFormat = "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}";
+				format.Format = "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}";
 			}
 
-			string result = settings.ConsoleLogFormat;
+			string messageFormat = format.Format;
 
 			// Timestamp with optional format
-			result = Regex.Replace(
-				result,
+			messageFormat = Regex.Replace(
+				messageFormat,
 				@"\{timestamp(?::(?<fmt>[^}]+))?\}",
 				match =>
 				{
@@ -43,55 +43,51 @@ namespace Helyn.Logger
 
 			// Log level (with optional coloring)
 			string logTypeString = logType.ToString();
-			if (settings.ColorLogLevel)
+			if (format.EnableColorLogLevel)
 			{
-				string color = GetColorForLogType(logType, settings);
+				string color = GetColorForLogType(logType, format);
 
 				if (!string.IsNullOrWhiteSpace(color))
 				{
-					logTypeString = $"<color={color}>{logTypeString}</color>";
+					logTypeString = $"<color=#{color}>{logTypeString}</color>";
 				}
 			}
-			result = result.Replace("{level}", logTypeString);
+			messageFormat = messageFormat.Replace("{level}", logTypeString);
 
 			// Category
-			result = result.Replace("{category}", category ?? string.Empty);
+			messageFormat = messageFormat.Replace("{category}", category ?? string.Empty);
 
 			// Message
-			result = result.Replace("{message}", message ?? string.Empty);
+			messageFormat = messageFormat.Replace("{message}", message ?? string.Empty);
 
 			// Thread ID
-			if (result.Contains("{threadId}"))
+			if (messageFormat.Contains("{threadId}"))
 			{
-				result = result.Replace("{threadId}", Thread.CurrentThread.ManagedThreadId.ToString());
+				messageFormat = messageFormat.Replace("{threadId}", Thread.CurrentThread.ManagedThreadId.ToString());
 			}
 
 			// Task ID
-			if (result.Contains("{taskId}"))
+			if (messageFormat.Contains("{taskId}"))
 			{
-				result = result.Replace("{taskId}", Task.CurrentId?.ToString() ?? "null");
+				messageFormat = messageFormat.Replace("{taskId}", Task.CurrentId?.ToString() ?? "null");
 			}
 
-			return result;
+			return messageFormat;
 		}
 
 		[HideInCallstack]
-		private static string GetColorForLogType(LogType level, LoggerSettings settings)
+		private static string GetColorForLogType(LogType level, LogFormat format)
 		{
-			if (!settings.ColorLogLevel)
+			Color levelColor = level switch
 			{
-				return string.Empty;
-			}
-
-			return level switch
-			{
-				LogType.Log => settings.LogColor,
-				LogType.Warning => settings.WarningColor,
-				LogType.Error => settings.ErrorColor,
-				LogType.Assert => settings.AssertColor,
-				LogType.Exception => settings.ExceptionColor,
-				_ => settings.NoneColor
+				LogType.Log => format.LogColor,
+				LogType.Warning => format.WarningColor,
+				LogType.Error => format.ErrorColor,
+				LogType.Assert => format.AssertColor,
+				LogType.Exception => format.ExceptionColor,
+				_ => format.NoneColor
 			};
+			return ColorUtility.ToHtmlStringRGB(levelColor);
 		}
 	}
 }

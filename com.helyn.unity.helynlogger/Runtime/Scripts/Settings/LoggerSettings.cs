@@ -1,16 +1,18 @@
 // This code has been made by Simon VRANA.
 // Please ask by email (simon.vrana.pro@gmail.com) before reusing for commercial purpose.
 
+using Newtonsoft.Json;
 using System.IO;
 using UnityEngine;
 
 namespace Helyn.Logger
 {
-	public class LoggerSettings
+	public record LoggerSettings
 	{
 		public string ConfigFolderPath { get; set; } = "HelynLogger";
 		public string ConfigFileName { get; set; } = "HelynLoggerConfig.json";
 
+		[JsonIgnore]
 		public string ConfigFilePath
 		{
 			get
@@ -33,14 +35,7 @@ namespace Helyn.Logger
 		#region Unity console
 
 		public bool EnableConsoleLogging { get; set; } = true;
-		public string ConsoleLogFormat { get; set; } = "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}";
-		public bool ColorLogLevel { get; set; } = false;
-		public string LogColor { get; set; } = "white";
-		public string WarningColor { get; set; } = "yellow";
-		public string ErrorColor { get; set; } = "red";
-		public string AssertColor { get; set; } = "red";
-		public string ExceptionColor { get; set; } = "magenta";
-		public string NoneColor { get; set; } = "white";
+		public LogFormat ConsoleLogFormat { get; set; } = new();
 
 		#endregion Unity console
 
@@ -48,7 +43,7 @@ namespace Helyn.Logger
 
 		public bool EnableFileLogging { get; set; } = false;
 		public string LogFilePath { get; set; } = "logs/log.txt";
-		public string FileLogFormat { get; set; } = "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}";
+		public LogFormat FileLogFormat { get; set; } = new();
 
 		#endregion File
 	}
