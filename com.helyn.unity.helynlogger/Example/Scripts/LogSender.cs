@@ -14,16 +14,16 @@ namespace Helyn.Logger.Example
 		[SerializeField] private Button assertButton;
 		[SerializeField] private Button exceptionButton;
 
-		void Start()
+		private void Start()
 		{
 			logButton.onClick.AddListener(() => Debug.Log("This is an example of \"Log\" level log."));
 			warningButton.onClick.AddListener(() => Debug.LogWarning("This is an example of a Warning log."));
 			errorButton.onClick.AddListener(() => Debug.LogError("This is an example of an Error log."));
 			assertButton.onClick.AddListener(() => Debug.LogAssertion("This is an example of an Assertion failure."));
-			exceptionButton.onClick.AddListener(() => Debug.LogException(new System.Exception("This is an example of an Exception.")));
+			exceptionButton.onClick.AddListener(() => throw new System.Exception("This is an example of an Exception."));
 		}
 
-		void OnDestroy()
+		private void OnDestroy()
 		{
 			logButton.onClick.RemoveAllListeners();
 			warningButton.onClick.RemoveAllListeners();

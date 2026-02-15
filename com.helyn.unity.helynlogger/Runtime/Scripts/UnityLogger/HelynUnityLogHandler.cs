@@ -22,8 +22,16 @@ namespace Helyn.Logger
 		[HideInCallstack]
 		internal static void LogFormat(LogType logType, string categoryName, UnityEngine.Object context, string format, object[] args)
 		{
-			string finalMessage = (args != null && args.Length > 0) ? string.Format(format, args)
-																	: format;
+			string finalMessage = format;
+			try
+			{
+				finalMessage = (args != null && args.Length > 0) ? string.Format(format, args)
+																 : format;
+			}
+			catch
+			{
+				finalMessage = format;
+			}
 
 			DefaultLogHandler.LogFormat(logType, context, "{0}", LogFormatter.FormatLogMessage(logType, categoryName, finalMessage, Format));
 		}

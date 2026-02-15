@@ -2,7 +2,7 @@
   "ConfigFolderPath": "HelynLogger",
   "ConfigFileName": "HelynLoggerConfig.json",
   "DefaultLogLevel": 3,
-  "Filter": "{\"Helyn.Logger.Example\":\"Log\"}",
+  "Filter": "{\"Helyn.Logger.Example\":\"Warning\"}",
   "EnableConsoleLogging": true,
   "ConsoleLogFormat": {
     "Format": "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}",
@@ -44,7 +44,7 @@
       "a": 1.0
     }
   },
-  "EnableFileLogging": false,
+  "EnableFileLogging": true,
   "LogFilePath": "logs/log.txt",
   "FileLogFormat": {
     "Format": "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}",

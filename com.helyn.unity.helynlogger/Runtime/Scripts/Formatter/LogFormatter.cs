@@ -11,6 +11,9 @@ namespace Helyn.Logger
 {
 	public class LogFormatter
 	{
+		private static readonly Regex timestampRegex = new(@"\{timestamp(?::(?<fmt>[^}]+))?\}",
+															RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
 		[HideInCallstack]
 		public static string FormatLogMessage(LogType logType,
 											  string category,
@@ -25,21 +28,17 @@ namespace Helyn.Logger
 			string messageFormat = format.Format;
 
 			// Timestamp with optional format
-			messageFormat = Regex.Replace(
-				messageFormat,
-				@"\{timestamp(?::(?<fmt>[^}]+))?\}",
-				match =>
-				{
-					string fmt = match.Groups["fmt"].Value;
-					if (string.IsNullOrEmpty(fmt))
-					{
-						fmt = "yyyy-MM-dd HH:mm:ss.fff"; // default
-					}
+			messageFormat = timestampRegex.Replace(messageFormat, match =>
+			{
+				string fmt = match.Groups["fmt"].Value;
 
-					return DateTime.Now.ToString(fmt);
-				},
-				RegexOptions.IgnoreCase
-			);
+				if (string.IsNullOrEmpty(fmt))
+				{
+					fmt = "yyyy-MM-dd HH:mm:ss.fff";
+				}
+
+				return DateTime.Now.ToString(fmt);
+			});
 
 			// Log level (with optional coloring)
 			string logTypeString = logType.ToString();

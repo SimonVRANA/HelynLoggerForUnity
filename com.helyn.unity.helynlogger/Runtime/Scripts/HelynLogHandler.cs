@@ -12,8 +12,6 @@ namespace Helyn.Logger
 		private readonly LoggerSettings settings;
 		private readonly LogFilter logFilter;
 
-		private readonly HelynFileLogHandler fileLogHandler = new();
-
 		private readonly ILogHandler defaultLogHandler;
 
 		public HelynLogHandler(ILogHandler defautlLogHandler)
@@ -25,6 +23,9 @@ namespace Helyn.Logger
 			this.defaultLogHandler = defautlLogHandler;
 			HelynUnityLogHandler.DefaultLogHandler = defaultLogHandler;
 			HelynUnityLogHandler.Format = settings.ConsoleLogFormat;
+
+			HelynFileLogHandler.Format = settings.FileLogFormat;
+			HelynFileLogHandler.LogFilePath = settings.LogFilePath;
 		}
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -50,7 +51,7 @@ namespace Helyn.Logger
 
 			if (settings.EnableFileLogging)
 			{
-				fileLogHandler.LogException(exception, context);
+				HelynFileLogHandler.LogException(category, exception, context);
 			}
 			if (settings.EnableConsoleLogging)
 			{
@@ -69,7 +70,7 @@ namespace Helyn.Logger
 
 			if (settings.EnableFileLogging)
 			{
-				fileLogHandler.LogFormat(logType, context, format, args);
+				HelynFileLogHandler.LogFormat(logType, category, context, format, args);
 			}
 			if (settings.EnableConsoleLogging)
 			{
