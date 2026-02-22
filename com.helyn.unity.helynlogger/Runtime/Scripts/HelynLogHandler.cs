@@ -118,6 +118,7 @@ namespace Helyn.Logger
 
 				// SKIP only the logging plumbing
 				if (type == typeof(HelynLogHandler) ||          // this
+					type == typeof(DebugProxy) ||               // The DebugProxy static class that users call directly
 					type == typeof(UnityEngine.Debug) ||        // Unity Debug
 					type == typeof(UnityEngine.Logger) ||       // Unity Loggertype == typeof(UnityEngine.Assertions.Assert) || // Unity Assertions
 					type.Name == "DebugLogHandler")             // Handle Unity LogHandler internal class by name (just in case)

@@ -84,10 +84,7 @@ namespace Helyn.Logger
 			// Flush on application quit
 			try
 			{
-				Application.quitting += () =>
-				{
-					ShutdownAndFlushAsync().GetAwaiter().GetResult();
-				};
+				Application.quitting += () => ShutdownAndFlushAsync().GetAwaiter().GetResult();
 			}
 			catch
 			{
@@ -105,7 +102,7 @@ namespace Helyn.Logger
 					await queueSignal.WaitAsync(token).ConfigureAwait(false);
 
 					// Dequeue and write everything currently queued to reduce syscalls
-					while (writeQueue.TryDequeue(out string? message))
+					while (writeQueue.TryDequeue(out string message))
 					{
 						try
 						{
@@ -131,7 +128,7 @@ namespace Helyn.Logger
 				// expected during shutdown
 			}
 
-			while (writeQueue.TryDequeue(out string? remaining))
+			while (writeQueue.TryDequeue(out string remaining))
 			{
 				try
 				{

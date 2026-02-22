@@ -69,8 +69,6 @@ namespace Helyn.Logger
 			return defaultLogLevel;
 		}
 
-		// Unity LogType Enum is not sorted by severity!
-		// Error=0, Assert=1, Warning=2, Log=3, Exception=4
 		private bool IsSeverityHighEnough(HelynLogLevel incoming, HelynLogLevel threshold)
 		{
 			return GetSeverity(incoming) >= GetSeverity(threshold);

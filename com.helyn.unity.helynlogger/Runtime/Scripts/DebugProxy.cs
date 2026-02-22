@@ -7,26 +7,43 @@ namespace Helyn.Logger
 {
 	public static class DebugProxy
 	{
-		public static void Log(object message) => Debug.Log(message);
+		[HideInCallstack]
+		public static void Log(object message) => UnityEngine.Debug.Log(message);
 
-		public static void Log(object message, Object context) => Debug.Log(message, context);
+		[HideInCallstack]
+		public static void Log(object message, Object context) => UnityEngine.Debug.Log(message, context);
 
-		public static void LogFormat(string format, params object[] args) => Debug.LogFormat(format, args);
+		[HideInCallstack]
+		public static void LogFormat(string format, params object[] args) => UnityEngine.Debug.LogFormat(format, args);
 
-		public static void LogWarning(object message) => Debug.LogWarning(message);
+		[HideInCallstack]
+		public static void LogWarning(object message) => UnityEngine.Debug.LogWarning(message);
 
-		public static void LogWarning(object message, Object context) => Debug.LogWarning(message, context);
+		[HideInCallstack]
+		public static void LogWarning(object message, Object context) => UnityEngine.Debug.LogWarning(message, context);
 
-		public static void LogError(object message) => Debug.LogError(message);
+		[HideInCallstack]
+		public static void LogError(object message) => UnityEngine.Debug.LogError(message);
 
-		public static void LogError(object message, Object context) => Debug.LogError(message, context);
+		[HideInCallstack]
+		public static void LogError(object message, Object context) => UnityEngine.Debug.LogError(message, context);
 
-		public static void LogException(System.Exception exception) => Debug.LogException(exception);
+		[HideInCallstack]
+		public static void LogException(System.Exception exception) => UnityEngine.Debug.LogException(exception);
 
-		public static void LogException(System.Exception exception, Object context) => Debug.LogException(exception, context);
+		[HideInCallstack]
+		public static void LogException(System.Exception exception, Object context) => UnityEngine.Debug.LogException(exception, context);
 
+		[HideInCallstack]
+		public static void LogAssertion(object message) => UnityEngine.Debug.LogAssertion(message);
+
+		[HideInCallstack]
+		public static void LogAssertion(object message, Object context) => UnityEngine.Debug.LogAssertion(message, context);
+
+		[HideInCallstack]
 		public static void LogTrace(string message) => LogTrace(null, message);
 
+		[HideInCallstack]
 		public static void LogTrace(Object context, string format, params object[] args)
 		{
 			if (HelynLogHandler.Instance != null
@@ -48,12 +65,13 @@ namespace Helyn.Logger
 				{
 					finalMessage = format;
 				}
-				UnityEngine.Debug.Log(finalMessage, context);
 			}
 		}
 
+		[HideInCallstack]
 		public static void LogTrace(System.Func<string> messageMethod) => LogTrace(null, messageMethod);
 
+		[HideInCallstack]
 		public static void LogTrace(Object context, System.Func<string> messageMethod, params object[] args)
 		{
 			if (messageMethod == null)

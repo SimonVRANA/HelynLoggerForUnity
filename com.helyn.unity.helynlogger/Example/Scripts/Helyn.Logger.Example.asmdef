@@ -1,7 +1,9 @@
 {
     "name": "Helyn.Logger.Example",
     "rootNamespace": "Helyn.Logger.Example",
-    "references": [],
+    "references": [
+        "GUID:9d51cb48feb9fe34ba25cff38199814b"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
