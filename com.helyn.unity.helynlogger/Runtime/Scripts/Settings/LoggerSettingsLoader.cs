@@ -42,7 +42,7 @@ namespace Helyn.Logger
 				{
 					Debug.LogError("Failed to load default logger settings after creating default settings file.");
 					Debug.LogException(secondException);
-					return LoadSettings();
+					return new LoggerSettings();
 				}
 			}
 		}

@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Helyn.Logger
@@ -34,12 +35,30 @@ namespace Helyn.Logger
 				}
 
 				// Ensure directory exists
-				Directory.CreateDirectory(Path.GetDirectoryName(finalPath)!);
+				string dir = Path.GetDirectoryName(finalPath);
+				if (!string.IsNullOrEmpty(dir))
+				{
+					try
+					{
+						Directory.CreateDirectory(dir);
+					}
+					catch
+					{
+						// best effort
+					}
+				}
 
-				// Delete file if exists for fresh start
+				// Delete file if exists for fresh start (best effort)
 				if (File.Exists(finalPath))
 				{
-					File.Delete(finalPath);
+					try
+					{
+						File.Delete(finalPath);
+					}
+					catch
+					{
+						// ignore
+					}
 				}
 
 				logFilePath = finalPath;
@@ -54,15 +73,25 @@ namespace Helyn.Logger
 			try
 			{
 				string unityStyle = StackTraceUtility.ExtractStringFromException(exception);
-				string formattedMessage = LogFormatter.FormatLogMessage(LogType.Exception,
+				string formattedMessage = LogFormatter.FormatLogMessage(HelynLogLevel.Exception,
 																		categoryName,
 																		unityStyle,
 																		Format);
 
-				lock (fileLock)
+				Task.Run(() =>
 				{
-					File.AppendAllText(LogFilePath, formattedMessage + Environment.NewLine);
-				}
+					try
+					{
+						lock (fileLock)
+						{
+							File.AppendAllText(LogFilePath, formattedMessage + Environment.NewLine);
+						}
+					}
+					catch
+					{
+						// Never throw from logging
+					}
+				});
 			}
 			catch
 			{
@@ -71,7 +100,7 @@ namespace Helyn.Logger
 		}
 
 		[HideInCallstack]
-		internal static void LogFormat(LogType logType, string categoryName, UnityEngine.Object context, string format, object[] args)
+		internal static void LogFormat(HelynLogLevel logType, string categoryName, UnityEngine.Object context, string format, object[] args)
 		{
 			string finalMessage = format;
 			try
@@ -88,10 +117,20 @@ namespace Helyn.Logger
 
 			try
 			{
-				lock (fileLock)
+				Task.Run(() =>
 				{
-					File.AppendAllText(LogFilePath, formatedMessage + Environment.NewLine);
-				}
+					try
+					{
+						lock (fileLock)
+						{
+							File.AppendAllText(LogFilePath, formatedMessage + Environment.NewLine);
+						}
+					}
+					catch
+					{
+						// NEVER throw inside logging. Silent failure is standard.
+					}
+				});
 			}
 			catch
 			{

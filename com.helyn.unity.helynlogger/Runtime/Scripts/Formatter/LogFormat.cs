@@ -11,6 +11,8 @@ namespace Helyn.Logger
 		public string Format { get; set; } = "[{timestamp:yyyy-MM-dd HH:mm:ss.fff}] {level} {category}: {message}";
 		public bool EnableColorLogLevel { get; set; } = false;
 		[JsonConverter(typeof(UnityColorConverter))]
+		public Color TraceColor { get; set; } = Color.lightGray;
+		[JsonConverter(typeof(UnityColorConverter))]
 		public Color LogColor { get; set; } = Color.white;
 		[JsonConverter(typeof(UnityColorConverter))]
 		public Color WarningColor { get; set; } = Color.yellow;

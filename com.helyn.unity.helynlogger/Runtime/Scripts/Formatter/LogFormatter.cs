@@ -15,7 +15,7 @@ namespace Helyn.Logger
 															RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		[HideInCallstack]
-		public static string FormatLogMessage(LogType logType,
+		public static string FormatLogMessage(HelynLogLevel logLevel,
 											  string category,
 											  string message,
 											  LogFormat format)
@@ -41,10 +41,10 @@ namespace Helyn.Logger
 			});
 
 			// Log level (with optional coloring)
-			string logTypeString = logType.ToString();
+			string logTypeString = logLevel.ToString();
 			if (format.EnableColorLogLevel)
 			{
-				string color = GetColorForLogType(logType, format);
+				string color = GetColorForLogType(logLevel, format);
 
 				if (!string.IsNullOrWhiteSpace(color))
 				{
@@ -75,15 +75,16 @@ namespace Helyn.Logger
 		}
 
 		[HideInCallstack]
-		private static string GetColorForLogType(LogType level, LogFormat format)
+		private static string GetColorForLogType(HelynLogLevel level, LogFormat format)
 		{
 			Color levelColor = level switch
 			{
-				LogType.Log => format.LogColor,
-				LogType.Warning => format.WarningColor,
-				LogType.Error => format.ErrorColor,
-				LogType.Assert => format.AssertColor,
-				LogType.Exception => format.ExceptionColor,
+				HelynLogLevel.Trace => format.TraceColor,
+				HelynLogLevel.Log => format.LogColor,
+				HelynLogLevel.Warning => format.WarningColor,
+				HelynLogLevel.Error => format.ErrorColor,
+				HelynLogLevel.Assert => format.AssertColor,
+				HelynLogLevel.Exception => format.ExceptionColor,
 				_ => format.NoneColor
 			};
 			return ColorUtility.ToHtmlStringRGB(levelColor);

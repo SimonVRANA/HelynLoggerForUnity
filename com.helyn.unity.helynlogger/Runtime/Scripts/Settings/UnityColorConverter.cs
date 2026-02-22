@@ -24,12 +24,12 @@ namespace Helyn.Logger
 		{
 			JObject jsonObject = JObject.Load(reader);
 
-			return new Color(
-				(float)jsonObject["r"],
-				(float)jsonObject["g"],
-				(float)jsonObject["b"],
-				(float)jsonObject["a"]
-			);
+			float r = jsonObject["r"]?.Value<float>() ?? 0f;
+			float g = jsonObject["g"]?.Value<float>() ?? 0f;
+			float b = jsonObject["b"]?.Value<float>() ?? 0f;
+			float a = jsonObject["a"]?.Value<float>() ?? 1f;
+
+			return new Color(r, g, b, a);
 		}
 	}
 }

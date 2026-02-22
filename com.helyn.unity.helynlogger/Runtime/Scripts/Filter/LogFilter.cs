@@ -3,27 +3,26 @@
 
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
-using UnityEngine;
 
 namespace Helyn.Logger
 {
 	public class LogFilter
 	{
-		private LogType defaultLogLevel = LogType.Log;
+		private HelynLogLevel defaultLogLevel = HelynLogLevel.Log;
 
-		private ConcurrentDictionary<string, LogType> logLevelForCategories = new();
-		private readonly ConcurrentDictionary<string, LogType> resolvedLogTypes = new();
+		private ConcurrentDictionary<string, HelynLogLevel> logLevelForCategories = new();
+		private readonly ConcurrentDictionary<string, HelynLogLevel> resolvedLogTypes = new();
 
-		public LogFilter(string filterJson, LogType defaultLogLevel)
+		public LogFilter(string filterJson, HelynLogLevel defaultLogLevel)
 		{
 			UpdateSettings(filterJson, defaultLogLevel);
 		}
 
-		public void UpdateSettings(string filterJson, LogType newDefaultLevel)
+		public void UpdateSettings(string filterJson, HelynLogLevel newDefaultLevel)
 		{
 			this.defaultLogLevel = newDefaultLevel;
 
-			ConcurrentDictionary<string, LogType> newRules = JsonConvert.DeserializeObject<ConcurrentDictionary<string, LogType>>(filterJson);
+			ConcurrentDictionary<string, HelynLogLevel> newRules = JsonConvert.DeserializeObject<ConcurrentDictionary<string, HelynLogLevel>>(filterJson);
 			if (newRules != null)
 			{
 				logLevelForCategories = newRules;
@@ -32,27 +31,27 @@ namespace Helyn.Logger
 			resolvedLogTypes.Clear();
 		}
 
-		public bool ShouldLog(string category, LogType incomingLogType)
+		public bool ShouldLog(string category, HelynLogLevel incomingLogType)
 		{
 			// 1. Check Cache
-			if (resolvedLogTypes.TryGetValue(category, out LogType cachedThreshold))
+			if (resolvedLogTypes.TryGetValue(category, out HelynLogLevel cachedThreshold))
 			{
 				return IsSeverityHighEnough(incomingLogType, cachedThreshold);
 			}
 
 			// 2. Calculate & Cache
-			LogType foundThreshold = FindEffectiveLogLevel(category);
+			HelynLogLevel foundThreshold = FindEffectiveLogLevel(category);
 			resolvedLogTypes.TryAdd(category, foundThreshold);
 
 			return IsSeverityHighEnough(incomingLogType, foundThreshold);
 		}
 
-		private LogType FindEffectiveLogLevel(string category)
+		private HelynLogLevel FindEffectiveLogLevel(string category)
 		{
 			string currentSearch = category;
 			while (!string.IsNullOrEmpty(currentSearch))
 			{
-				if (logLevelForCategories.TryGetValue(currentSearch, out LogType threshold))
+				if (logLevelForCategories.TryGetValue(currentSearch, out HelynLogLevel threshold))
 				{
 					return threshold;
 				}
@@ -72,20 +71,21 @@ namespace Helyn.Logger
 
 		// Unity LogType Enum is not sorted by severity!
 		// Error=0, Assert=1, Warning=2, Log=3, Exception=4
-		private bool IsSeverityHighEnough(LogType incoming, LogType threshold)
+		private bool IsSeverityHighEnough(HelynLogLevel incoming, HelynLogLevel threshold)
 		{
 			return GetSeverity(incoming) >= GetSeverity(threshold);
 		}
 
-		private int GetSeverity(LogType logType)
+		private int GetSeverity(HelynLogLevel logType)
 		{
 			return logType switch
 			{
-				LogType.Exception => 5,
-				LogType.Error => 4,
-				LogType.Assert => 4, // Treat Assert like Error
-				LogType.Warning => 3,
-				LogType.Log => 2,
+				HelynLogLevel.Exception => 6,
+				HelynLogLevel.Error => 5,
+				HelynLogLevel.Assert => 5, // Treat Assert like Error
+				HelynLogLevel.Warning => 4,
+				HelynLogLevel.Log => 3,
+				HelynLogLevel.Trace => 2,
 				_ => 1
 			};
 		}

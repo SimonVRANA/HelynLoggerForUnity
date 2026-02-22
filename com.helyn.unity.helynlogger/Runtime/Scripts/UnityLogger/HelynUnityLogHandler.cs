@@ -14,13 +14,13 @@ namespace Helyn.Logger
 		[HideInCallstack]
 		internal static void LogException(string categoryName, Exception exception, UnityEngine.Object context)
 		{
-			string header = LogFormatter.FormatLogMessage(LogType.Exception, categoryName, "Exception Triggered:", Format);
+			string header = LogFormatter.FormatLogMessage(HelynLogLevel.Exception, categoryName, "Exception Triggered:", Format);
 			DefaultLogHandler.LogFormat(LogType.Exception, context, "{0}", header);
 			DefaultLogHandler.LogException(exception, context);
 		}
 
 		[HideInCallstack]
-		internal static void LogFormat(LogType logType, string categoryName, UnityEngine.Object context, string format, object[] args)
+		internal static void LogFormat(HelynLogLevel logLevel, string categoryName, UnityEngine.Object context, string format, object[] args)
 		{
 			string finalMessage = format;
 			try
@@ -33,7 +33,7 @@ namespace Helyn.Logger
 				finalMessage = format;
 			}
 
-			DefaultLogHandler.LogFormat(logType, context, "{0}", LogFormatter.FormatLogMessage(logType, categoryName, finalMessage, Format));
+			DefaultLogHandler.LogFormat(logLevel.ToUnityLogType(), context, "{0}", LogFormatter.FormatLogMessage(logLevel, categoryName, finalMessage, Format));
 		}
 	}
 }

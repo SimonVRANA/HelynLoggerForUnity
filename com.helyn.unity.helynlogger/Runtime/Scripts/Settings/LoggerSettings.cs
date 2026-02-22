@@ -29,7 +29,7 @@ namespace Helyn.Logger
 			}
 		}
 
-		public LogType DefaultLogLevel => LogType.Log;
+		public HelynLogLevel DefaultLogLevel => HelynLogLevel.Log;
 		public string Filter { get; set; } = "{}";
 
 		#region Unity console

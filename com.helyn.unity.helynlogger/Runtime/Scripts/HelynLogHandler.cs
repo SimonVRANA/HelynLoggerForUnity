@@ -9,23 +9,27 @@ namespace Helyn.Logger
 {
 	public class HelynLogHandler : ILogHandler
 	{
+		public static HelynLogHandler Instance { get; private set; } = null;
+		public LogFilter LogFilter { get; private set; } = null;
+
 		private readonly LoggerSettings settings;
-		private readonly LogFilter logFilter;
 
 		private readonly ILogHandler defaultLogHandler;
 
-		public HelynLogHandler(ILogHandler defautlLogHandler)
+		public HelynLogHandler(ILogHandler defaultLogHandler)
 		{
 			settings = LoggerSettingsLoader.LoadSettings();
 
-			logFilter = new LogFilter(settings.Filter, settings.DefaultLogLevel);
+			LogFilter = new LogFilter(settings.Filter, settings.DefaultLogLevel);
 
-			this.defaultLogHandler = defautlLogHandler;
-			HelynUnityLogHandler.DefaultLogHandler = defaultLogHandler;
+			this.defaultLogHandler = defaultLogHandler;
+			HelynUnityLogHandler.DefaultLogHandler = this.defaultLogHandler;
 			HelynUnityLogHandler.Format = settings.ConsoleLogFormat;
 
 			HelynFileLogHandler.Format = settings.FileLogFormat;
 			HelynFileLogHandler.LogFilePath = settings.LogFilePath;
+
+			Instance = this;
 		}
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -44,7 +48,7 @@ namespace Helyn.Logger
 		public void LogException(Exception exception, UnityEngine.Object context)
 		{
 			string category = GetCategory(context);
-			if (!logFilter.ShouldLog(category, LogType.Exception))
+			if (!LogFilter.ShouldLog(category, HelynLogLevel.Exception))
 			{
 				return;
 			}
@@ -62,8 +66,14 @@ namespace Helyn.Logger
 		[HideInCallstack]
 		public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
 		{
+			LogFormat(logType.ToHelynLogLevel(), context, format, args);
+		}
+
+		[HideInCallstack]
+		public void LogFormat(HelynLogLevel logType, UnityEngine.Object context, string format, params object[] args)
+		{
 			string category = GetCategory(context);
-			if (!logFilter.ShouldLog(category, logType))
+			if (!LogFilter.ShouldLog(category, logType))
 			{
 				return;
 			}
@@ -78,7 +88,7 @@ namespace Helyn.Logger
 			}
 		}
 
-		private string GetCategory(UnityEngine.Object context)
+		public static string GetCategory(UnityEngine.Object context)
 		{
 			// 1. Context is King: If explicit context exists, use it.
 			if (context != null)
