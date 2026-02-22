@@ -2,7 +2,9 @@
 // Please ask by email (simon.vrana.pro@gmail.com) before reusing for commercial purpose.
 
 using System;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -65,7 +67,96 @@ namespace Helyn.Logger
 			}
 		}
 
+		// Queue-based background writer to preserve order
+		private static readonly ConcurrentQueue<string> writeQueue = new();
+
+		private static readonly SemaphoreSlim queueSignal = new(0);
 		private static readonly object fileLock = new();
+		private static readonly CancellationTokenSource cts = new();
+		private static readonly Task backgroundWriterTask;
+		private const int maxPendingMessages = 10000;
+
+		static HelynFileLogHandler()
+		{
+			// Start background writer
+			backgroundWriterTask = Task.Run(BackgroundWriterLoop, cts.Token);
+
+			// Flush on application quit
+			try
+			{
+				Application.quitting += () =>
+				{
+					ShutdownAndFlushAsync().GetAwaiter().GetResult();
+				};
+			}
+			catch
+			{
+				// ignore if Application.quitting subscription fails
+			}
+		}
+
+		private static async Task BackgroundWriterLoop()
+		{
+			CancellationToken token = cts.Token;
+			try
+			{
+				while (!token.IsCancellationRequested)
+				{
+					await queueSignal.WaitAsync(token).ConfigureAwait(false);
+
+					// Dequeue and write everything currently queued to reduce syscalls
+					while (writeQueue.TryDequeue(out string? message))
+					{
+						try
+						{
+							if (string.IsNullOrEmpty(logFilePath))
+							{
+								continue;
+							}
+
+							lock (fileLock)
+							{
+								File.AppendAllText(logFilePath, message + Environment.NewLine);
+							}
+						}
+						catch
+						{
+							// Never throw from logging
+						}
+					}
+				}
+			}
+			catch (OperationCanceledException)
+			{
+				// expected during shutdown
+			}
+
+			while (writeQueue.TryDequeue(out string? remaining))
+			{
+				try
+				{
+					if (!string.IsNullOrEmpty(logFilePath))
+					{
+						lock (fileLock)
+						{
+							File.AppendAllText(logFilePath, remaining + Environment.NewLine);
+						}
+					}
+				}
+				catch { }
+			}
+		}
+
+		private static async Task ShutdownAndFlushAsync()
+		{
+			try
+			{
+				cts.Cancel();
+				queueSignal.Release();
+				await backgroundWriterTask.ConfigureAwait(false);
+			}
+			catch { }
+		}
 
 		[HideInCallstack]
 		internal static void LogException(string categoryName, Exception exception, UnityEngine.Object context)
@@ -76,22 +167,8 @@ namespace Helyn.Logger
 				string formattedMessage = LogFormatter.FormatLogMessage(HelynLogLevel.Exception,
 																		categoryName,
 																		unityStyle,
-																		Format);
-
-				Task.Run(() =>
-				{
-					try
-					{
-						lock (fileLock)
-						{
-							File.AppendAllText(LogFilePath, formattedMessage + Environment.NewLine);
-						}
-					}
-					catch
-					{
-						// Never throw from logging
-					}
-				});
+																			Format);
+				EnqueueWrite(formattedMessage);
 			}
 			catch
 			{
@@ -114,28 +191,18 @@ namespace Helyn.Logger
 			}
 
 			string formatedMessage = LogFormatter.FormatLogMessage(logType, categoryName, finalMessage, Format);
+			EnqueueWrite(formatedMessage);
+		}
 
-			try
+		private static void EnqueueWrite(string message)
+		{
+			if (writeQueue.Count > maxPendingMessages)
 			{
-				Task.Run(() =>
-				{
-					try
-					{
-						lock (fileLock)
-						{
-							File.AppendAllText(LogFilePath, formatedMessage + Environment.NewLine);
-						}
-					}
-					catch
-					{
-						// NEVER throw inside logging. Silent failure is standard.
-					}
-				});
+				_ = writeQueue.TryDequeue(out _);
 			}
-			catch
-			{
-				// NEVER throw inside logging. Silent failure is standard.
-			}
+
+			writeQueue.Enqueue(message);
+			queueSignal.Release();
 		}
 	}
 }
